@@ -53,19 +53,30 @@
             return this.map(function () {
                 var value = ($(this).val() || "0"),
                     isNegative = value.indexOf("-") !== -1,
-                    decimalPart;
-                // get the last position of the array that is a number(coercion makes "" to be evaluated as false)
-                $(value.split(/\D/).reverse()).each(function (index, element) {
-                    if (element) {
-                        decimalPart = element;
-                        return false;
+                    decimalPart,
+					settings = $(this).data("settings") || defaultOptions;
+
+                // if precision is > 0, we apply adjusts for precision,
+                if (settings.precision > 0) {
+                    // get the last position of the array that is a number(coercion makes "" to be evaluated as false)
+
+                	// use settings.decimal to split
+                    $(value.split(settings.decimal).reverse()).each(function (index, element) {
+                        if (element) {
+                            decimalPart = element;
+                            return false;
+                        }
+                    });
+                    value = value.replace(/\D/g, "");
+                    value = value.replace(new RegExp(decimalPart + "$"), "." + decimalPart);
+                    if (isNegative) {
+                        value = "-" + value;
                     }
-                });
-                value = value.replace(/\D/g, "");
-                value = value.replace(new RegExp(decimalPart + "$"), "." + decimalPart);
-                if (isNegative) {
-                    value = "-" + value;
+                } else {
+                	// if <= 0, replace the thousands to ''
+                	value = value.replace(/\D/g, "");
                 }
+				
                 return parseFloat(value);
             });
         },
