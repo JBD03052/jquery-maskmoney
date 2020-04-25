@@ -54,14 +54,13 @@
                 var value = ($(this).val() || "0"),
                     isNegative = value.indexOf("-") !== -1,
                     decimalPart,
-					settings = $(this).data("settings") || defaultOptions;
+                    settings = $(this).data("settings") || defaultOptions;
 
                 // if precision is > 0, we apply adjusts for precision,
                 if (settings.precision > 0) {
                     // get the last position of the array that is a number(coercion makes "" to be evaluated as false)
 
-                	// use settings.decimal to split
-                    $(value.split(settings.decimal).reverse()).each(function (index, element) {
+                    $(value.split(/\D/).reverse()).each(function (index, element) {
                         if (element) {
                             decimalPart = element;
                             return false;
@@ -73,8 +72,11 @@
                         value = "-" + value;
                     }
                 } else {
-                	// if <= 0, replace the thousands to ''
-                	value = value.replace(/\D/g, "");
+                     // if <= 0, replace the thousands to ''
+                     value = value.replace(/\D/g, "");
+                     if (isNegative) {
+                         value = "-" + value;
+                     }
                 }
 				
                 return parseFloat(value);
@@ -85,8 +87,21 @@
             return this.map(function () {
                 var value = ($(this).val() || "0"),
 					settings = $(this).data("settings") || defaultOptions,
+                    isNegative = value.indexOf("-") !== -1,
 					regExp = new RegExp((settings.thousandsForUnmasked || settings.thousands), "g");
+
+                value = value.replace(/\s/g, "");
+                if (settings.prefix !== "") {
+                    value = value.replace(settings.prefix, "");
+                }
+                if (settings.sufix !== "") {
+                    value = value.replace(settings.sufix, "");
+                }
                 value = value.replace(regExp, "");
+                if (isNegative) {
+                    value = "-" + value;
+                }
+				
                 return parseFloat(value);
             });
         },
